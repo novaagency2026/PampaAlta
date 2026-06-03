@@ -3,775 +3,518 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>La Pampa Alta — Cocina Gourmet Argentina</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Raleway:wght@200;300;400;500&display=swap" rel="stylesheet">
-
-<!-- ══════════════════════════════════════════
-     FIREBASE CONFIG — reemplazá estos valores
-     con los de tu proyecto en:
-     Firebase Console → Configuración → Tu app web
-     ══════════════════════════════════════════ -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey:            "TU_API_KEY",
-    authDomain:        "bistro-8315e.firebaseapp.com",
-    databaseURL:       "https://bistro-8315e-default-rtdb.firebaseio.com",
-    projectId:         "bistro-8315e",
-    storageBucket:     "bistro-8315e.appspot.com",
-    messagingSenderId: "TU_SENDER_ID",
-    appId:             "TU_APP_ID"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
-
-  /* ── Categorías que queremos escuchar ── */
-  const categorias = ["entradas", "principales", "postres", "vinos"];
-
-  categorias.forEach(cat => {
-    onValue(ref(db, cat), snap => {
-      const data = snap.val();
-      if (data) renderSeccion(cat, data);
-    });
-  });
-
-  /* ── Renderizado dinámico ── */
-  function renderSeccion(cat, data) {
-    const grid = document.getElementById(`grid-${cat}`);
-    if (!grid) return;
-    grid.innerHTML = "";
-
-    Object.entries(data).forEach(([id, item], i) => {
-      if (!item.disponible && item.disponible !== undefined) return;
-
-      if (cat === "vinos") {
-        grid.innerHTML += `
-          <div class="vino-card">
-            <p class="vino-region">${item.region || ""}</p>
-            <h3 class="vino-nombre">${item.nombre}</h3>
-            <p class="vino-varietal">${item.varietal || ""} ${item.cosecha ? "— " + item.cosecha : ""}</p>
-            <p class="vino-precio">$${Number(item.precio).toLocaleString("es-AR")} / botella</p>
-          </div>`;
-      } else {
-        const num = String(i + 1).padStart(2, "0");
-        const tags = item.tags ? item.tags.map(t =>
-          `<span class="tag ${t === "Chef" || t === "Signature" || t === "Favorito" ? "destacado" : ""}">${t}</span>`
-        ).join("") : "";
-        const precio = item.precio === "Consultar" || !item.precio
-          ? "Consultar" : `$${Number(item.precio).toLocaleString("es-AR")}`;
-
-        grid.innerHTML += `
-          <div class="plato-card">
-            <div class="plato-num">${num}</div>
-            <h3 class="plato-nombre">${item.nombre}</h3>
-            <p class="plato-descripcion">${item.descripcion || ""}</p>
-            <div class="plato-footer">
-              <span class="plato-precio">${precio}</span>
-              <div class="plato-tags">${tags}</div>
-            </div>
-          </div>`;
-      }
-    });
-
-    /* Si llegaron datos, ocultamos el estado vacío */
-    const empty = document.getElementById(`empty-${cat}`);
-    if (empty) empty.style.display = "none";
-  }
-</script>
-
+<title>La Pampa Alta — Cocina Gourmet Argentina · Jujuy</title>
+<meta name="description" content="Cocina de autor en San Salvador de Jujuy. Ingredientes de estancia, técnica de altura, alma norteña.">
+<meta property="og:type" content="restaurant">
+<meta property="og:title" content="La Pampa Alta — Cocina Gourmet Argentina · Jujuy">
+<meta property="og:description" content="Sabores profundos de la Argentina. Ingredientes de estancia, técnica de altura, alma norteña. San Salvador de Jujuy · Desde 2018.">
+<meta property="og:image" content="https://images.pexels.com/videos/19034640/argentina-jujuy-mountains-north-19034640.jpeg?auto=compress&cs=tinysrgb&h=627&fit=crop&w=1200">
+<meta property="og:locale" content="es_AR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Restaurant","name":"La Pampa Alta","telephone":"+54-388-422-0000","address":{"@type":"PostalAddress","streetAddress":"Av. Belgrano 1240","addressLocality":"San Salvador de Jujuy","addressRegion":"Jujuy","addressCountry":"AR"},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"12:30","closes":"15:30"},{"@type":"OpeningHoursSpecification","dayOfWeek":["Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"20:00","closes":"23:30"}],"servesCuisine":"Cocina Argentina de Autor","priceRange":"$$$$","foundingDate":"2018"}</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231A0A04'/><text y='22' x='3' font-size='18' font-family='serif' fill='%23C4783C'>LP</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Cinzel:wght@400;600&family=Raleway:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* PALETA NOA — tierra · ocre · cardón */
+:root{
+  --bg0:#0E0804; --bg1:#180C05; --bg2:#201208; --bg3:#2C1A0C; --bg4:#381F0E;
+  --oc:#C4783C; --ocl:#D9956A; --ocp:#ECC49E; --ocd:#7A4A22;
+  --t1:#F0E6D4; --t2:#C4A882; --t3:#8A7255; --t4:#4E3820;
+  --b0:rgba(196,120,60,.10); --b1:rgba(196,120,60,.20); --b2:rgba(196,120,60,.40);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg1);color:var(--t1);font-family:'Raleway',sans-serif;font-weight:300;overflow-x:hidden}
 
-  :root {
-    --azul:        #0D1B2A;   /* azul noche profundo */
-    --azul-medio:  #1B2E45;   /* superficie cards */
-    --azul-suave:  #243447;   /* bordes / hover */
-    --cobre:       #B87333;   /* acento principal */
-    --cobre-claro: #D4956A;   /* acento secundario */
-    --blanco-roto: #F2EDE4;   /* texto claro / bg secciones */
-    --crema:       #EDE5D8;   /* bg alternativo */
-    --gris:        #8A9BB0;   /* texto secundario */
-  }
+/* CURSOR — solo desktop con mouse */
+.cur-dot,.cur-ring{display:none;position:fixed;pointer-events:none;border-radius:50%;z-index:99999}
+@media(pointer:fine){
+  body{cursor:none}
+  .cur-dot{display:block;width:7px;height:7px;background:var(--oc);transform:translate(-50%,-50%)}
+  .cur-ring{display:block;width:34px;height:34px;border:1px solid var(--oc);opacity:.45;transform:translate(-50%,-50%);transition:width .28s,height .28s,opacity .28s}
+  .cur-ring.big{width:56px;height:56px;opacity:.85}
+}
 
-  html { scroll-behavior: smooth; }
+/* NOISE */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9000;opacity:.28;mix-blend-mode:overlay}
 
-  body {
-    background: var(--blanco-roto);
-    color: var(--azul);
-    font-family: 'Raleway', sans-serif;
-    font-weight: 300;
-    overflow-x: hidden;
-  }
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.8rem 4rem;transition:background .5s,padding .4s,border-color .5s;border-bottom:1px solid transparent}
+nav.scrolled{background:rgba(24,12,5,.96);backdrop-filter:blur(14px);padding:1.1rem 4rem;border-bottom-color:var(--b0)}
+.nav-logo{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:.22em;text-transform:uppercase;color:var(--oc);text-decoration:none}
+@media(min-width:901px){}
 
-  /* ── HERO ── */
-  .hero {
-    min-height: 100vh;
-    background: var(--azul);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 4rem 2rem;
-    position: relative;
-    overflow: hidden;
-  }
 
-  .hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 70% 50% at 50% 40%, rgba(184,115,51,0.1) 0%, transparent 65%),
-      repeating-linear-gradient(
-        -60deg,
-        transparent, transparent 60px,
-        rgba(184,115,51,0.03) 60px, rgba(184,115,51,0.03) 61px
-      );
-  }
 
-  .hero-eyebrow {
-    font-size: 0.6rem;
-    letter-spacing: 0.55em;
-    text-transform: uppercase;
-    color: var(--cobre);
-    margin-bottom: 2rem;
-    opacity: 0;
-    animation: fadeUp 0.9s ease 0.2s forwards;
-  }
 
-  .hero-titulo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(3.8rem, 11vw, 7.5rem);
-    font-weight: 300;
-    color: var(--blanco-roto);
-    line-height: 0.88;
-    letter-spacing: -0.01em;
-    opacity: 0;
-    animation: fadeUp 0.9s ease 0.5s forwards;
-  }
+@media(min-width:901px){}
 
-  .hero-titulo em {
-    font-style: italic;
-    color: var(--cobre);
-    display: block;
-    font-size: 0.65em;
-    letter-spacing: 0.06em;
-    margin-top: 0.2em;
-  }
+/* hamburger — hidden by default, shown on mobile */
 
-  .hero-ornamento {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin: 2.5rem 0;
-    opacity: 0;
-    animation: fadeUp 0.9s ease 0.8s forwards;
-  }
 
-  .hero-ornamento span {
-    width: 80px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--cobre));
-  }
 
-  .hero-ornamento span:last-child {
-    background: linear-gradient(90deg, var(--cobre), transparent);
-  }
 
-  .hero-ornamento i {
-    color: var(--cobre);
-    font-size: 0.5rem;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    font-style: normal;
-    font-family: 'Raleway', sans-serif;
-  }
 
-  .hero-desc {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 1.15rem;
-    color: rgba(242,237,228,0.65);
-    max-width: 440px;
-    line-height: 1.75;
-    opacity: 0;
-    animation: fadeUp 0.9s ease 1s forwards;
-  }
 
-  .btn-carta {
-    display: inline-block;
-    margin-top: 3rem;
-    padding: 1rem 2.8rem;
-    border: 1px solid var(--cobre);
-    color: var(--cobre);
-    font-family: 'Raleway', sans-serif;
-    font-size: 0.6rem;
-    font-weight: 400;
-    letter-spacing: 0.45em;
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: all 0.35s ease;
-    opacity: 0;
-    animation: fadeUp 0.9s ease 1.2s forwards;
-  }
+/* ── MOBILE MENU OVERLAY ── */
+/* Uses visibility+opacity — NEVER display:none so it doesn't occupy space */
 
-  .btn-carta:hover {
-    background: var(--cobre);
-    color: var(--azul);
-  }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
 
-  /* ── NAV ── */
-  .nav-carta {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: var(--azul);
-    border-bottom: 1px solid rgba(184,115,51,0.25);
-    display: flex;
-    justify-content: center;
-    overflow-x: auto;
-    scrollbar-width: none;
-    transition: box-shadow 0.3s;
-  }
+#mobMenu a:hover{color:var(--oc)}
 
-  .nav-carta::-webkit-scrollbar { display: none; }
 
-  .nav-item {
-    padding: 1.1rem 2rem;
-    font-size: 0.58rem;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    color: rgba(242,237,228,0.5);
-    cursor: pointer;
-    transition: all 0.3s;
-    white-space: nowrap;
-    border-bottom: 2px solid transparent;
-    font-weight: 400;
-  }
 
-  .nav-item:hover { color: var(--cobre-claro); }
 
-  .nav-item.activo {
-    color: var(--cobre);
-    border-bottom-color: var(--cobre);
-  }
+/* ── HERO ── */
+#hero{position:relative;min-height:100svh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.h-vid{position:absolute;inset:0;overflow:hidden}
+.h-vid video{width:100%;height:100%;object-fit:cover;filter:brightness(.35) saturate(.8) sepia(.2)}
+.h-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(24,12,5,.65) 0%,rgba(14,8,4,.08) 45%,rgba(14,8,4,.82) 100%)}
+.h-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(196,120,60,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(196,120,60,.055) 1px,transparent 1px);background-size:70px 70px;transform:perspective(700px) rotateX(48deg) scale(2.2) translateY(18%);transform-origin:center bottom;animation:gridMove 22s linear infinite;will-change:background-position}
+@keyframes gridMove{from{background-position:0 0}to{background-position:70px 70px}}
+.h-glow{position:absolute;width:660px;height:660px;border-radius:50%;background:radial-gradient(circle,rgba(140,60,30,.18) 0%,transparent 68%);top:50%;left:50%;transform:translate(-50%,-52%);animation:glowP 7s ease-in-out infinite}
+@keyframes glowP{0%,100%{opacity:.7;transform:translate(-50%,-52%) scale(1)}50%{opacity:1;transform:translate(-50%,-52%) scale(1.1)}}
+.h-ring{position:absolute;border-radius:50%;border:1px solid;top:50%;left:50%}
+.hr1{width:560px;height:560px;border-color:rgba(196,120,60,.07);transform:translate(-50%,-50%);animation:spin 50s linear infinite}
+.hr2{width:400px;height:400px;border-color:rgba(196,120,60,.09);transform:translate(-50%,-50%);animation:spin 34s linear infinite reverse}
+.hr3{width:240px;height:240px;border-color:rgba(196,120,60,.07);transform:translate(-50%,-50%)}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.particle{position:absolute;border-radius:50%;background:var(--oc);animation:floatUp linear infinite;opacity:0}
+@keyframes floatUp{0%{transform:translateY(100vh) translateX(0);opacity:0}8%{opacity:.4}92%{opacity:.15}100%{transform:translateY(-8vh) translateX(var(--dx));opacity:0}}
+.h-content{position:relative;z-index:2;text-align:center;padding:0 2rem;max-width:900px}
+.h-eye{display:flex;align-items:center;justify-content:center;gap:1rem;font-size:.6rem;letter-spacing:.38em;text-transform:uppercase;color:var(--oc);margin-bottom:2.2rem;opacity:0;animation:fUp .9s .4s forwards}
+.h-eye::before,.h-eye::after{content:'';width:36px;height:1px;background:var(--ocd)}
+h1{font-family:'Cormorant Garamond',serif;font-size:clamp(4.5rem,13vw,10.5rem);font-weight:300;line-height:.92;letter-spacing:-.015em;opacity:0;animation:fUp 1.1s .7s forwards}
+h1 em{font-style:italic;color:var(--oc);display:block}
+.h-sub{font-family:'Cormorant Garamond',serif;font-size:clamp(1rem,2.5vw,1.45rem);font-style:italic;color:var(--t2);letter-spacing:.06em;margin-top:1.3rem;opacity:0;animation:fUp .9s 1.05s forwards}
+.h-desc{font-size:.74rem;letter-spacing:.15em;color:var(--t3);line-height:2;margin:.9rem auto 0;max-width:460px;opacity:0;animation:fUp .9s 1.25s forwards}
+.h-btns{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;margin-top:3.2rem;opacity:0;animation:fUp .9s 1.5s forwards}
+.btn-s{display:inline-flex;align-items:center;padding:.95rem 2.4rem;background:var(--oc);color:var(--bg0);text-decoration:none;font-size:.65rem;letter-spacing:.26em;text-transform:uppercase;font-weight:400;position:relative;overflow:hidden;transition:background .3s,transform .2s,box-shadow .3s}
+.btn-s::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);transform:translateX(-110%) skewX(-18deg);transition:transform .48s cubic-bezier(.23,1,.32,1)}
+.btn-s:hover::before{transform:translateX(110%) skewX(-18deg)}
+.btn-s:hover{background:var(--ocl);transform:translateY(-2px);box-shadow:0 14px 36px rgba(140,58,30,.35)}
+.btn-o{display:inline-flex;align-items:center;padding:.95rem 2.4rem;border:1px solid var(--b2);color:var(--oc);text-decoration:none;font-size:.65rem;letter-spacing:.26em;text-transform:uppercase;font-weight:400;transition:border-color .3s,background .3s,transform .2s}
+.btn-o:hover{border-color:var(--oc);background:rgba(196,120,60,.09);transform:translateY(-2px)}
+.h-scroll{position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;opacity:0;animation:fIn 1s 2.2s forwards}
+.h-scroll span{font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;color:var(--t4)}
+.scroll-bar{width:1px;height:46px;background:linear-gradient(to bottom,var(--ocd),transparent);animation:sB 2.2s ease-in-out infinite}
+@keyframes sB{0%,100%{opacity:.35}50%{opacity:1}}
+.vcredit{position:absolute;bottom:.8rem;right:1rem;font-size:.5rem;letter-spacing:.08em;color:rgba(196,120,60,.3);text-decoration:none;z-index:3}
+@keyframes fUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fIn{from{opacity:0}to{opacity:1}}
 
-  /* ── SECCIONES ── */
-  .seccion {
-    padding: 6rem 2rem;
-    max-width: 1120px;
-    margin: 0 auto;
-    display: none;
-  }
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .85s cubic-bezier(.23,1,.32,1),transform .85s cubic-bezier(.23,1,.32,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.08s}.d2{transition-delay:.18s}.d3{transition-delay:.28s}.d4{transition-delay:.38s}
 
-  .seccion.visible { display: block; }
+/* MARQUEE */
+.mq{overflow:hidden;padding:1.1rem 0;background:var(--bg0);border-top:1px solid var(--b0);border-bottom:1px solid var(--b0)}
+.mq-t{display:flex;white-space:nowrap;animation:mLeft 30s linear infinite}
+.mi{display:flex;align-items:center;gap:2.5rem;padding-right:2.5rem;font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;color:var(--t3);letter-spacing:.05em}
+.mdot{width:4px;height:4px;border-radius:50%;background:var(--ocd);flex-shrink:0}
+@keyframes mLeft{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
-  .seccion-header {
-    text-align: center;
-    margin-bottom: 4rem;
-  }
+/* SECTION COMMONS */
+.eye{display:flex;align-items:center;justify-content:center;gap:1rem;font-size:.58rem;letter-spacing:.38em;text-transform:uppercase;color:var(--oc);margin-bottom:1.4rem}
+.eye::before,.eye::after{content:'';width:28px;height:1px;background:var(--ocd)}
+.stitle{font-family:'Cormorant Garamond',serif;font-size:clamp(2.4rem,5.5vw,4.8rem);font-weight:300;line-height:1;letter-spacing:-.01em}
+.stitle em{font-style:italic;color:var(--oc)}
 
-  .seccion-etiqueta {
-    font-size: 0.58rem;
-    letter-spacing: 0.55em;
-    text-transform: uppercase;
-    color: var(--cobre);
-    margin-bottom: 1rem;
-    font-weight: 400;
-  }
+/* ── HISTORIA ── */
+#historia{padding:9rem 4rem;background:var(--bg0)}
+.hist-g{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:7rem;align-items:center}
+.ht .eye{justify-content:flex-start}.ht .eye::before{display:none}
+.ht .stitle{margin-bottom:2.2rem;text-align:left}
+.ht p{font-family:'Cormorant Garamond',serif;font-size:1.2rem;line-height:1.92;color:var(--t2);margin-bottom:1.4rem}
+.ht strong{color:var(--t1);font-weight:400}
+.hstats{display:flex;gap:2.8rem;margin-top:2.8rem;padding-top:2rem;border-top:1px solid var(--b0)}
+.snum{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:300;color:var(--oc);line-height:1}
+.slbl{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--t3);margin-top:.35rem}
+.hv{position:relative}
+.hframe{
+  aspect-ratio:3/4;overflow:hidden;position:relative;
+  background-image:url('https://images.pexels.com/photos/958546/pexels-photo-958546.jpeg?auto=compress&cs=tinysrgb&w=800&h=1067&fit=crop');
+  background-size:cover;background-position:center;
+  border:1px solid var(--b1);
+}
+.hframe::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(14,8,4,.1) 0%,rgba(14,8,4,.5) 100%)}
+.hoff{position:absolute;top:1.4rem;left:1.4rem;right:-1.4rem;bottom:-1.4rem;border:1px solid var(--b1);pointer-events:none}
+.hbadge{position:absolute;bottom:2rem;right:-2.2rem;background:var(--ocd);padding:1.1rem 1.4rem;text-align:center;border:1px solid var(--b2)}
+.hby{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--ocp);display:block;line-height:1}
+.hbl{font-size:.55rem;letter-spacing:.28em;text-transform:uppercase;color:var(--ocl);display:block;margin-top:4px}
 
-  .seccion-titulo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2.2rem, 5vw, 3.8rem);
-    font-weight: 300;
-    color: var(--azul);
-    line-height: 1.05;
-  }
+/* ── CARTA ── */
+#carta{padding:9rem 4rem;background:var(--bg1)}
+.carta-w{max-width:1180px;margin:0 auto}
+.chdr{text-align:center;margin-bottom:4rem}
+.tabs{display:flex;justify-content:center;margin-bottom:3.5rem;flex-wrap:wrap}
+.tb{padding:.75rem 2rem;font-family:'Raleway',sans-serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;font-weight:300;background:transparent;color:var(--t3);border:1px solid var(--b0);border-right:none;cursor:pointer;transition:color .28s,background .28s}
+.tb:last-child{border-right:1px solid var(--b0)}
+.tb:hover:not([aria-selected="true"]){color:var(--oc);background:rgba(196,120,60,.06)}
+.tb[aria-selected="true"]{background:var(--ocd);color:var(--ocp);border-color:var(--ocd)}
+.panel{opacity:0;pointer-events:none;position:absolute;width:1px;height:1px;overflow:hidden}
+.panel.active{opacity:1;pointer-events:auto;position:static;width:auto;height:auto;overflow:visible;animation:pIn .42s cubic-bezier(.23,1,.32,1)}
+@keyframes pIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--b0)}
+.mgrid3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.mc{background:var(--bg1);padding:2.4rem 2.8rem;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:background .35s}
+.mc::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:linear-gradient(to right,var(--ocd),var(--oc));transition:width .5s cubic-bezier(.23,1,.32,1)}
+.mc:hover{background:var(--bg2)}.mc:hover::after{width:100%}
+.cr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
+.cnum{font-family:'Cormorant Garamond',serif;font-size:.8rem;font-style:italic;color:var(--t4)}
+.ctags{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.tag{font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;color:var(--oc);border:1px solid var(--b1);padding:2px 7px}
+.mname{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:300;line-height:1.2;margin-bottom:.75rem;color:var(--t1)}
+.mdesc{font-family:'Cormorant Garamond',serif;font-size:.97rem;font-style:italic;color:var(--t3);line-height:1.75;flex:1}
+.mprice{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:300;color:var(--oc);margin-top:1.4rem}
+.mprice.q{font-size:.95rem;font-style:italic;color:var(--t4)}
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b0)}
+.vc{background:var(--bg1);padding:2.2rem 2.4rem;transition:background .35s;position:relative;overflow:hidden}
+.vc::before{content:'';position:absolute;top:0;left:0;right:0;height:0;background:linear-gradient(to bottom,rgba(196,120,60,.1),transparent);transition:height .4s}
+.vc:hover{background:var(--bg2)}.vc:hover::before{height:100%}
+.vr{font-size:.56rem;letter-spacing:.26em;text-transform:uppercase;color:var(--oc);margin-bottom:.9rem}
+.vn{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:300;margin-bottom:.4rem;color:var(--t1)}
+.vv{font-family:'Cormorant Garamond',serif;font-size:.9rem;font-style:italic;color:var(--t3);margin-bottom:1.1rem}
+.vp{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;color:var(--oc)}
 
-  .seccion-titulo em {
-    font-style: italic;
-    color: var(--cobre);
-  }
+/* ── EXPERIENCIA ── */
+#experiencia{padding:9rem 4rem;background:var(--bg0)}
+.exp-w{max-width:1180px;margin:0 auto}
+.exp-hdr{text-align:center;margin-bottom:5rem}
+.exp-g{display:grid;grid-template-columns:repeat(3,1fr);gap:3.5rem}
+.expc{text-align:center;padding:2.8rem 2rem;border:1px solid var(--b0);position:relative;transition:border-color .4s,background .4s}
+.expc::before{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:0;height:1px;background:var(--oc);transition:width .5s cubic-bezier(.23,1,.32,1)}
+.expc:hover{border-color:var(--b1);background:rgba(44,26,12,.5)}.expc:hover::before{width:80%}
+.eico{width:54px;height:54px;border-radius:50%;border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.8rem;font-size:1.3rem;color:var(--oc);transition:background .3s,border-color .3s}
+.expc:hover .eico{background:rgba(196,120,60,.12);border-color:var(--b2)}
+.expc h3{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:300;margin-bottom:.9rem}
+.expc p{font-size:.78rem;color:var(--t3);line-height:1.95}
 
-  .divisor {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    margin: 1.5rem auto;
-    width: fit-content;
-  }
+/* ── RESERVAS ── */
+#reservas{padding:9rem 4rem;background:var(--bg1)}
+.res-w{max-width:780px;margin:0 auto;text-align:center}
+.rinfo{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;margin:3.8rem 0;padding:2.8rem 0;border-top:1px solid var(--b0);border-bottom:1px solid var(--b0)}
+.ril{font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--oc);margin-bottom:.9rem}
+.riv{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--t1);line-height:1.8}
+.rform{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;text-align:left}
+.fg{display:flex;flex-direction:column;gap:.45rem}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:.58rem;letter-spacing:.24em;text-transform:uppercase;color:var(--t3)}
+.fg input,.fg select,.fg textarea{background:var(--bg3);border:1px solid var(--b0);color:var(--t1);padding:.85rem 1.1rem;font-family:'Cormorant Garamond',serif;font-size:1rem;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .3s,background .3s;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--oc);background:var(--bg4);box-shadow:0 0 0 3px rgba(196,120,60,.12)}
+.fg select option{background:var(--bg3);color:var(--t1)}
+.fg textarea{resize:vertical;min-height:90px}
+.bsub{grid-column:1/-1;margin-top:.5rem;width:100%;padding:1.15rem;background:var(--ocd);color:var(--ocp);border:none;cursor:pointer;font-family:'Raleway',sans-serif;font-size:.65rem;letter-spacing:.28em;text-transform:uppercase;font-weight:400;transition:background .3s,transform .2s}
+.bsub:hover{background:var(--oc);color:var(--bg0);transform:translateY(-1px)}
+.fok{display:none;padding:2rem 1.5rem;border:1px solid var(--b1);background:rgba(44,26,12,.3);margin-top:1.5rem;text-align:center}
+.fok.show{display:block;animation:fIn .5s}
+.fok p{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-style:italic;color:var(--oc)}
 
-  .divisor span {
-    width: 40px;
-    height: 1px;
-    background: var(--cobre);
-    opacity: 0.5;
-  }
+/* ── FOOTER ── */
+footer{background:var(--bg0);padding:5rem 4rem 2.5rem;border-top:1px solid var(--b0)}
+.fg2{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;margin-bottom:3.5rem}
+.flogo{font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:.2em;color:var(--oc);text-transform:uppercase;display:block;margin-bottom:1.4rem;text-decoration:none}
+.fdesc{font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;color:var(--t3);line-height:1.85;max-width:270px}
+.fc h4{font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--oc);margin-bottom:1.4rem}
+.fc ul{list-style:none}.fc li{margin-bottom:.75rem}
+.fc a{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--t3);text-decoration:none;transition:color .3s}
+.fc a:hover{color:var(--oc)}
+.fc address{font-style:normal;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--t3);line-height:1.9}
+.fbot{max-width:1180px;margin:0 auto;padding-top:2rem;border-top:1px solid var(--b0);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.fbot p{font-size:.6rem;letter-spacing:.1em;color:var(--t4)}
+.fbot a{color:var(--t4);text-decoration:none}.fbot a:hover{color:var(--t3)}
 
-  .divisor-dot {
-    width: 5px;
-    height: 5px;
-    border: 1px solid var(--cobre);
-    transform: rotate(45deg);
-    opacity: 0.7;
-  }
-
-  /* ── GRID PLATOS ── */
-  .platos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1px;
-    background: var(--crema);
-    border: 1px solid var(--crema);
-  }
-
-  .plato-card {
-    background: white;
-    padding: 2.2rem 2.5rem;
-    border-left: 3px solid transparent;
-    transition: all 0.35s ease;
-    cursor: default;
-  }
-
-  .plato-card:hover {
-    border-left-color: var(--cobre);
-    background: #FDFBF8;
-  }
-
-  .plato-num {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.8rem;
-    font-weight: 300;
-    color: var(--crema);
-    line-height: 1;
-    margin-bottom: 0.6rem;
-  }
-
-  .plato-nombre {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.45rem;
-    font-weight: 400;
-    color: var(--azul);
-    margin-bottom: 0.5rem;
-    line-height: 1.2;
-  }
-
-  .plato-descripcion {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 0.98rem;
-    color: #6B7C8F;
-    line-height: 1.75;
-    margin-bottom: 1.4rem;
-  }
-
-  .plato-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .plato-precio {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.35rem;
-    color: var(--azul);
-    font-weight: 600;
-  }
-
-  .plato-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-
-  .tag {
-    font-size: 0.52rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    padding: 0.28rem 0.65rem;
-    border: 1px solid var(--crema);
-    color: #8A9BB0;
-    font-weight: 400;
-  }
-
-  .tag.destacado {
-    background: var(--cobre);
-    border-color: var(--cobre);
-    color: white;
-  }
-
-  /* ── ESTADO VACÍO ── */
-  .empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #8A9BB0;
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 1.1rem;
-  }
-
-  /* ── SEPARADOR ── */
-  .banda {
-    background: var(--azul-medio);
-    padding: 3.5rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-  }
-
-  .banda-linea {
-    flex: 1;
-    height: 1px;
-    background: rgba(184,115,51,0.2);
-  }
-
-  .banda-texto {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    color: rgba(242,237,228,0.5);
-    font-size: 1rem;
-    white-space: nowrap;
-    text-align: center;
-  }
-
-  /* ── VINOS ── */
-  .vinos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.2rem;
-  }
-
-  .vino-card {
-    border: 1px solid rgba(0,0,0,0.08);
-    padding: 1.8rem 2rem;
-    background: white;
-    transition: border-color 0.3s, transform 0.3s;
-  }
-
-  .vino-card:hover {
-    border-color: var(--cobre);
-    transform: translateY(-2px);
-  }
-
-  .vino-region {
-    font-size: 0.54rem;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    color: var(--cobre);
-    margin-bottom: 0.6rem;
-    font-weight: 400;
-  }
-
-  .vino-nombre {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.35rem;
-    color: var(--azul);
-    margin-bottom: 0.3rem;
-  }
-
-  .vino-varietal {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 0.92rem;
-    color: var(--gris);
-    margin-bottom: 1.1rem;
-  }
-
-  .vino-precio {
-    font-size: 1rem;
-    color: var(--cobre);
-    font-weight: 400;
-  }
-
-  /* ── FOOTER ── */
-  footer {
-    background: var(--azul);
-    text-align: center;
-    padding: 5rem 2rem;
-    border-top: 1px solid rgba(184,115,51,0.2);
-  }
-
-  .footer-logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.2rem;
-    color: var(--blanco-roto);
-    font-weight: 300;
-    letter-spacing: 0.05em;
-  }
-
-  .footer-logo em { color: var(--cobre); font-style: italic; }
-
-  .footer-divider {
-    width: 40px;
-    height: 1px;
-    background: var(--cobre);
-    margin: 1.5rem auto;
-    opacity: 0.5;
-  }
-
-  .footer-info {
-    font-size: 0.62rem;
-    letter-spacing: 0.3em;
-    color: rgba(242,237,228,0.35);
-    text-transform: uppercase;
-    line-height: 2.4;
-  }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 600px) {
-    .platos-grid { grid-template-columns: 1fr; }
-    .nav-item    { padding: 1rem 1.2rem; font-size: 0.55rem; }
-    .banda-texto { font-size: 0.85rem; }
-  }
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){.fg2{grid-template-columns:1fr 1fr;gap:2.5rem}}
+@media(max-width:900px){
+  nav{padding:1.3rem 1.5rem}
+  nav.scrolled{padding:1rem 1.5rem}
+  
+  
+  h1{line-height:.94}
+  #historia{padding:5rem 1.5rem}
+  .hist-g{grid-template-columns:1fr;gap:3rem}
+  .hv{display:none}
+  #carta{padding:5rem 1.5rem}
+  .mgrid{grid-template-columns:1fr}
+  .vgrid{grid-template-columns:1fr 1fr}
+  .tb{font-size:.58rem;padding:.65rem 1.2rem}
+  .exp-g{grid-template-columns:1fr;gap:1.5rem}
+  #experiencia{padding:5rem 1.5rem}
+  #reservas{padding:5rem 1.5rem}
+  .rinfo{grid-template-columns:1fr;gap:2rem}
+  .rform{grid-template-columns:1fr}
+  .fg.full,.bsub{grid-column:1}
+  footer{padding:4rem 1.5rem 2rem}
+  .fg2{grid-template-columns:1fr;gap:2rem}
+  .fdesc{max-width:100%}
+  .fbot{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:480px){.vgrid{grid-template-columns:1fr}.hstats{flex-wrap:wrap;gap:1.5rem}.h-ring,.hr1,.hr2,.hr3{display:none}}
+:focus-visible{outline:2px solid var(--oc);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}}
 </style>
 </head>
 <body>
 
-<!-- HERO -->
-<section class="hero">
-  <p class="hero-eyebrow">San Salvador de Jujuy · Desde 2018</p>
-  <h1 class="hero-titulo">La Pampa<em>Alta</em></h1>
-  <div class="hero-ornamento">
-    <span></span>
-    <i>Cocina de autor</i>
-    <span></span>
-  </div>
-  <p class="hero-desc">Sabores profundos de la Argentina. Ingredientes de estancia, técnica de altura, alma norteña.</p>
-  <a href="#carta" class="btn-carta">Explorar la carta</a>
-</section>
+<div class="cur-dot" id="curDot" aria-hidden="true"></div>
+<div class="cur-ring" id="curRing" aria-hidden="true"></div>
 
 <!-- NAV -->
-<nav class="nav-carta" id="carta">
-  <div class="nav-item activo" onclick="mostrar('entradas', this)">Entradas</div>
-  <div class="nav-item"       onclick="mostrar('principales', this)">Principales</div>
-  <div class="nav-item"       onclick="mostrar('postres', this)">Postres</div>
-  <div class="nav-item"       onclick="mostrar('vinos', this)">Vinos & Bodega</div>
+<nav id="navbar" role="navigation" aria-label="Navegación principal">
+  <a href="#" class="nav-logo">La Pampa Alta</a>
 </nav>
 
-<!-- ENTRADAS -->
-<section class="seccion visible" id="sec-entradas">
-  <div class="seccion-header">
-    <p class="seccion-etiqueta">Para comenzar</p>
-    <h2 class="seccion-titulo">Entradas <em>de autor</em></h2>
-    <div class="divisor"><span></span><div class="divisor-dot"></div><span></span></div>
+<!-- HERO -->
+<section id="hero" aria-label="Bienvenida">
+  <div class="h-vid" aria-hidden="true">
+    <video autoplay muted loop playsinline
+      poster="https://images.pexels.com/videos/19034640/argentina-jujuy-mountains-north-19034640.jpeg?auto=compress&cs=tinysrgb&h=1080&fit=crop&w=1920">
+      <source src="https://videos.pexels.com/video-files/19034640/19034640-hd_1920_1080_30fps.mp4" type="video/mp4">
+    </video>
   </div>
-  <div class="platos-grid" id="grid-entradas">
-    <!-- DATOS ESTÁTICOS DE EJEMPLO — Firebase los reemplazará automáticamente -->
-    <div class="plato-card">
-      <div class="plato-num">01</div>
-      <h3 class="plato-nombre">Empanadas de Cordero Patagónico</h3>
-      <p class="plato-descripcion">Masa hojaldrada artesanal, relleno de cordero braseado con ciruelas, comino y malbec. Chimichurri de hierbas frescas.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">$4.800</span>
-        <div class="plato-tags"><span class="tag destacado">Chef</span></div>
-      </div>
-    </div>
-    <div class="plato-card">
-      <div class="plato-num">02</div>
-      <h3 class="plato-nombre">Tartar de Trucha Andina</h3>
-      <p class="plato-descripcion">Trucha arcoíris de ríos de Jujuy, alcaparras, cebolla morada encurtida, yema de huevo de campo y aceite de oliva extra virgen.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">$5.200</span>
-        <div class="plato-tags"><span class="tag">Fresco</span></div>
-      </div>
-    </div>
-    <div class="plato-card">
-      <div class="plato-num">03</div>
-      <h3 class="plato-nombre">Tabla de Chacinados Norteños</h3>
-      <p class="plato-descripcion">Embutidos artesanales de Quebrada, queso de cabra curado, miel de cardón y pan de maíz morado.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">$6.500</span>
-        <div class="plato-tags"><span class="tag">Compartir</span></div>
-      </div>
-    </div>
-    <div class="plato-card">
-      <div class="plato-num">04</div>
-      <h3 class="plato-nombre">Sopa de Locro Deconstruida</h3>
-      <p class="plato-descripcion">Crema de maíz blanco y zapallo, chips de maíz morado, aceite de chorizo colorado y microgreens de cilantro.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">$3.900</span>
-        <div class="plato-tags"><span class="tag">Temporada</span></div>
-      </div>
-    </div>
-    <div id="empty-entradas" class="empty-state" style="display:none;">
-      Cargando platos desde la base de datos…
+  <div class="h-ov"   aria-hidden="true"></div>
+  <div class="h-grid" aria-hidden="true"></div>
+  <div class="h-glow" aria-hidden="true"></div>
+  <div class="h-ring hr1" aria-hidden="true"></div>
+  <div class="h-ring hr2" aria-hidden="true"></div>
+  <div class="h-ring hr3" aria-hidden="true"></div>
+  <div class="particles" id="particles" aria-hidden="true"></div>
+  <div class="h-content">
+    <div class="h-eye" aria-hidden="true">San Salvador de Jujuy · Desde 2018</div>
+    <h1>La Pampa<em>Alta</em></h1>
+    <p class="h-sub">Cocina de autor</p>
+    <p class="h-desc">Sabores profundos de la Argentina. Ingredientes de estancia, técnica de altura, alma norteña.</p>
+    <div class="h-btns">
+      <a href="#carta"    class="btn-s">Explorar la carta</a>
+      <a href="#reservas" class="btn-o">Reservar mesa</a>
     </div>
   </div>
+  <div class="h-scroll" aria-hidden="true"><span>Descubrí</span><div class="scroll-bar"></div></div>
+  <a href="https://www.pexels.com/video/tilcara-jujuy-argentina-19034640/" class="vcredit" target="_blank" rel="noopener noreferrer">Video: Tilcara · Pexels</a>
 </section>
 
-<div class="banda">
-  <div class="banda-linea"></div>
-  <p class="banda-texto">Productos de origen local y estacional · Elaboración artesanal</p>
-  <div class="banda-linea"></div>
+<!-- MARQUEE -->
+<div class="mq" aria-hidden="true">
+  <div class="mq-t">
+    <div class="mi"><span>Ingredientes de estancia</span><span class="mdot"></span><span>Técnica de altura</span><span class="mdot"></span><span>Alma norteña</span><span class="mdot"></span><span>Cordero de la Quebrada</span><span class="mdot"></span><span>Vinos argentinos</span><span class="mdot"></span><span>Cocina de autor</span><span class="mdot"></span><span>Quebrada de Humahuaca</span><span class="mdot"></span><span>Puna · Jujuy</span><span class="mdot"></span><span>Desde 2018</span><span class="mdot"></span></div>
+    <div class="mi"><span>Ingredientes de estancia</span><span class="mdot"></span><span>Técnica de altura</span><span class="mdot"></span><span>Alma norteña</span><span class="mdot"></span><span>Cordero de la Quebrada</span><span class="mdot"></span><span>Vinos argentinos</span><span class="mdot"></span><span>Cocina de autor</span><span class="mdot"></span><span>Quebrada de Humahuaca</span><span class="mdot"></span><span>Puna · Jujuy</span><span class="mdot"></span><span>Desde 2018</span><span class="mdot"></span></div>
+  </div>
 </div>
 
-<!-- PRINCIPALES -->
-<section class="seccion" id="sec-principales">
-  <div class="seccion-header">
-    <p class="seccion-etiqueta">El corazón de la carta</p>
-    <h2 class="seccion-titulo">Platos <em>principales</em></h2>
-    <div class="divisor"><span></span><div class="divisor-dot"></div><span></span></div>
-  </div>
-  <div class="platos-grid" id="grid-principales">
-    <div class="plato-card">
-      <div class="plato-num">05</div>
-      <h3 class="plato-nombre">Asado de Tira Dry-Aged</h3>
-      <p class="plato-descripcion">Costilla de novillo pampeano madurado 45 días, cocción al asador de leña, papas aplastadas con grasa de wagyu y pimientos asados.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">$12.800</span>
-        <div class="plato-tags"><span class="tag destacado">Signature</span></div>
+<!-- HISTORIA -->
+<section id="historia" aria-labelledby="hh">
+  <div class="hist-g">
+    <div class="ht">
+      <div class="reveal"><div class="eye">Nuestra historia</div><h2 class="stitle" id="hh">La esencia de<br><em>la Puna</em></h2></div>
+      <div class="reveal d1">
+        <p>Nació en 2018 con una sola convicción: que la cocina del noroeste argentino merecía su propio lenguaje de alta gastronomía. <strong>Ingredientes de estancia, técnica precisa, producto local.</strong></p>
+        <p>Cada plato es un diálogo entre la Quebrada y el mundo. El cordero que llega de los valles, el cardón que da su miel, la quinoa de las alturas bolivianas. Todo tiene nombre y tiene tierra.</p>
+        <p>Nueve servicios por semana. Mesa completa. Sin apuros. Así se cocina en La Pampa Alta.</p>
+      </div>
+      <div class="hstats reveal d2">
+        <div><div class="snum">7+</div><div class="slbl">Años de trayectoria</div></div>
+        <div><div class="snum">11</div><div class="slbl">Platos de autor</div></div>
+        <div><div class="snum">6</div><div class="slbl">Bodegas seleccionadas</div></div>
       </div>
     </div>
-    <div class="plato-card">
-      <div class="plato-num">06</div>
-      <h3 class="plato-nombre">Cordero a la Llama</h3>
-      <p class="plato-descripcion">Paleta de cordero jujeño cocinada 12 horas, glaseada con reducción de malbec y miel silvestre, puré de raíces andinas.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">$10.500</span>
-        <div class="plato-tags"><span class="tag destacado">Chef</span><span class="tag">Lento</span></div>
-      </div>
+    <div class="hv reveal d3">
+      <div class="hframe"></div>
+      <div class="hoff" aria-hidden="true"></div>
+      <div class="hbadge" aria-hidden="true"><span class="hby">2018</span><span class="hbl">Desde</span></div>
     </div>
-    <div class="plato-card">
-      <div class="plato-num">07</div>
-      <h3 class="plato-nombre">Ñoquis de Quinoa Real</h3>
-      <p class="plato-descripcion">Masa de quinoa boliviana, salsa de hongos silvestres de la Puna, crema de queso de oveja y láminas de trufa negra.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">$8.200</span>
-        <div class="plato-tags"><span class="tag">Vegetariano</span></div>
-      </div>
-    </div>
-    <div class="plato-card">
-      <div class="plato-num">08</div>
-      <h3 class="plato-nombre">Pesca del Día en Costra de Sal</h3>
-      <p class="plato-descripcion">Según disponibilidad. Servida entera, abierta en sala, con aceite de hierbas andinas, limón de Tucumán y verduras braseadas.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">Consultar</span>
-        <div class="plato-tags"><span class="tag">Estacional</span></div>
-      </div>
-    </div>
-    <div id="empty-principales" class="empty-state" style="display:none;"></div>
   </div>
 </section>
 
-<!-- POSTRES -->
-<section class="seccion" id="sec-postres">
-  <div class="seccion-header">
-    <p class="seccion-etiqueta">El cierre perfecto</p>
-    <h2 class="seccion-titulo">Postres <em>& dulces</em></h2>
-    <div class="divisor"><span></span><div class="divisor-dot"></div><span></span></div>
+<!-- CARTA -->
+<main id="carta" aria-labelledby="hc">
+  <div class="carta-w">
+    <div class="chdr reveal"><div class="eye">Menú de autor</div><h2 class="stitle" id="hc">Nuestra <em>carta</em></h2></div>
+    <div class="tabs reveal d1" role="tablist" aria-label="Secciones de la carta">
+      <button class="tb" role="tab" id="tE" aria-selected="true"  aria-controls="pE" onclick="sw('E',this)">Entradas</button>
+      <button class="tb" role="tab" id="tP" aria-selected="false" aria-controls="pP" onclick="sw('P',this)">Principales</button>
+      <button class="tb" role="tab" id="tD" aria-selected="false" aria-controls="pD" onclick="sw('D',this)">Postres</button>
+      <button class="tb" role="tab" id="tV" aria-selected="false" aria-controls="pV" onclick="sw('V',this)">Vinos</button>
+    </div>
+    <div id="pE" role="tabpanel" aria-labelledby="tE" class="panel active">
+      <div class="mgrid">
+        <article class="mc"><div class="cr"><span class="cnum">01</span><div class="ctags"><span class="tag">Chef</span></div></div><h3 class="mname">Empanadas de Cordero Patagónico</h3><p class="mdesc">Masa hojaldrada artesanal, relleno de cordero braseado con ciruelas, comino y malbec. Chimichurri de hierbas frescas.</p><span class="mprice">$4.800</span></article>
+        <article class="mc"><div class="cr"><span class="cnum">02</span><div class="ctags"><span class="tag">Fresco</span></div></div><h3 class="mname">Tartar de Trucha Andina</h3><p class="mdesc">Trucha arcoíris de ríos de Jujuy, alcaparras, cebolla morada encurtida, yema de huevo de campo y aceite de oliva extra virgen.</p><span class="mprice">$5.200</span></article>
+        <article class="mc"><div class="cr"><span class="cnum">03</span><div class="ctags"><span class="tag">Compartir</span></div></div><h3 class="mname">Tabla de Chacinados Norteños</h3><p class="mdesc">Embutidos artesanales de Quebrada, queso de cabra curado, miel de cardón y pan de maíz morado.</p><span class="mprice">$6.500</span></article>
+        <article class="mc"><div class="cr"><span class="cnum">04</span><div class="ctags"><span class="tag">Temporada</span></div></div><h3 class="mname">Sopa de Locro Deconstruida</h3><p class="mdesc">Crema de maíz blanco y zapallo, chips de maíz morado, aceite de chorizo colorado y microgreens de cilantro.</p><span class="mprice">$3.900</span></article>
+      </div>
+    </div>
+    <div id="pP" role="tabpanel" aria-labelledby="tP" class="panel">
+      <div class="mgrid">
+        <article class="mc"><div class="cr"><span class="cnum">05</span><div class="ctags"><span class="tag">Signature</span></div></div><h3 class="mname">Asado de Tira Dry-Aged</h3><p class="mdesc">Costilla de novillo pampeano madurado 45 días, cocción al asador de leña, papas aplastadas con grasa de wagyu y pimientos asados.</p><span class="mprice">$12.800</span></article>
+        <article class="mc"><div class="cr"><span class="cnum">06</span><div class="ctags"><span class="tag">Chef</span><span class="tag">Lento</span></div></div><h3 class="mname">Cordero a la Llama</h3><p class="mdesc">Paleta de cordero jujeño cocinada 12 horas, glaseada con reducción de malbec y miel silvestre, puré de raíces andinas.</p><span class="mprice">$10.500</span></article>
+        <article class="mc"><div class="cr"><span class="cnum">07</span><div class="ctags"><span class="tag">Vegetariano</span></div></div><h3 class="mname">Ñoquis de Quinoa Real</h3><p class="mdesc">Masa de quinoa boliviana, salsa de hongos silvestres de la Puna, crema de queso de oveja y láminas de trufa negra.</p><span class="mprice">$8.200</span></article>
+        <article class="mc"><div class="cr"><span class="cnum">08</span><div class="ctags"><span class="tag">Estacional</span></div></div><h3 class="mname">Pesca del Día en Costra de Sal</h3><p class="mdesc">Según disponibilidad. Servida entera, abierta en sala, con aceite de hierbas andinas, limón de Tucumán y verduras braseadas.</p><span class="mprice q">Consultar al mozo</span></article>
+      </div>
+    </div>
+    <div id="pD" role="tabpanel" aria-labelledby="tD" class="panel">
+      <div class="mgrid mgrid3">
+        <article class="mc"><div class="cr"><span class="cnum">09</span><div class="ctags"><span class="tag">Favorito</span></div></div><h3 class="mname">Alfajor de Maicena Deconstruido</h3><p class="mdesc">Galleta fina de maicena, crema de dulce de leche artesanal, esferificaciones de naranja amarga y polvo de coco tostado.</p><span class="mprice">$3.400</span></article>
+        <article class="mc"><div class="cr"><span class="cnum">10</span><div class="ctags"><span class="tag">Clásico</span></div></div><h3 class="mname">Flan de Cardamomo</h3><p class="mdesc">Huevos de campo, infusión de cardamomo, caramelo de miel silvestre y helado de crema a la vainilla de Catamarca.</p><span class="mprice">$2.900</span></article>
+        <article class="mc"><div class="cr"><span class="cnum">11</span><div class="ctags"><span class="tag">Audaz</span></div></div><h3 class="mname">Helado Artesanal de Locoto</h3><p class="mdesc">Tres bochas: locoto rojo, frambuesa y chocolate amargo 70%. Sirope de algarrobo y flores comestibles de temporada.</p><span class="mprice">$2.500</span></article>
+      </div>
+    </div>
+    <div id="pV" role="tabpanel" aria-labelledby="tV" class="panel">
+      <div class="vgrid">
+        <article class="vc"><div class="vr">Mendoza — Luján de Cuyo</div><h3 class="vn">Achaval Ferrer Malbec</h3><p class="vv">Malbec 100% · Cosecha 2021</p><span class="vp">$9.800 / botella</span></article>
+        <article class="vc"><div class="vr">Salta — Cafayate</div><h3 class="vn">Clos de los Siete Blanc</h3><p class="vv">Torrontés · Cosecha 2022</p><span class="vp">$7.200 / botella</span></article>
+        <article class="vc"><div class="vr">Patagonia — Neuquén</div><h3 class="vn">Chacra Pinot Noir</h3><p class="vv">Pinot Noir · Cosecha 2020</p><span class="vp">$14.500 / botella</span></article>
+        <article class="vc"><div class="vr">Mendoza — Valle de Uco</div><h3 class="vn">Zuccardi Valle Cabernet</h3><p class="vv">Cabernet Franc · Cosecha 2021</p><span class="vp">$11.200 / botella</span></article>
+        <article class="vc"><div class="vr">La Rioja — Famatina</div><h3 class="vn">Anko Famatina Malbec</h3><p class="vv">Malbec · Cosecha 2022</p><span class="vp">$5.900 / botella</span></article>
+        <article class="vc"><div class="vr">Salta — Altura 2.400m</div><h3 class="vn">El Esteco Torrontés</h3><p class="vv">Torrontés Riojano · 2023</p><span class="vp">$4.800 / botella</span></article>
+      </div>
+    </div>
   </div>
-  <div class="platos-grid" id="grid-postres">
-    <div class="plato-card">
-      <div class="plato-num">09</div>
-      <h3 class="plato-nombre">Alfajor de Maicena Deconstruido</h3>
-      <p class="plato-descripcion">Galleta fina de maicena, crema de dulce de leche artesanal, esferificaciones de naranja amarga y polvo de coco tostado.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">$3.400</span>
-        <div class="plato-tags"><span class="tag destacado">Favorito</span></div>
-      </div>
+</main>
+
+<!-- EXPERIENCIA -->
+<section id="experiencia" aria-labelledby="he">
+  <div class="exp-w">
+    <div class="exp-hdr reveal"><div class="eye">La experiencia</div><h2 class="stitle" id="he">Cada detalle, <em>pensado</em></h2></div>
+    <div class="exp-g">
+      <div class="expc reveal"><div class="eico" aria-hidden="true">✦</div><h3>Producto local y estacional</h3><p>Trabajamos con productores de la Quebrada y la Puna. El menú cambia con las estaciones porque el campo manda.</p></div>
+      <div class="expc reveal d2"><div class="eico" aria-hidden="true">◈</div><h3>Elaboración artesanal</h3><p>Sin conservantes, sin atajos. Cada masa, caldo y embutido se elabora en nuestra cocina. El tiempo es un ingrediente.</p></div>
+      <div class="expc reveal d4"><div class="eico" aria-hidden="true">⊕</div><h3>Sala de autor</h3><p>Atención personalizada, mesa completa y cadencia de servicio que acompaña la conversación. Sin prisa, sin ruido.</p></div>
     </div>
-    <div class="plato-card">
-      <div class="plato-num">10</div>
-      <h3 class="plato-nombre">Flan de Cardamomo</h3>
-      <p class="plato-descripcion">Huevos de campo, infusión de cardamomo, caramelo de miel silvestre y helado de crema a la vainilla de Catamarca.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">$2.900</span>
-        <div class="plato-tags"><span class="tag">Clásico</span></div>
-      </div>
-    </div>
-    <div class="plato-card">
-      <div class="plato-num">11</div>
-      <h3 class="plato-nombre">Helado Artesanal de Locoto</h3>
-      <p class="plato-descripcion">Tres bochas: locoto rojo, frambuesa y chocolate amargo 70%. Sirope de algarrobo y flores comestibles de temporada.</p>
-      <div class="plato-footer">
-        <span class="plato-precio">$2.500</span>
-        <div class="plato-tags"><span class="tag">Audaz</span></div>
-      </div>
-    </div>
-    <div id="empty-postres" class="empty-state" style="display:none;"></div>
   </div>
 </section>
 
-<!-- VINOS -->
-<section class="seccion" id="sec-vinos">
-  <div class="seccion-header">
-    <p class="seccion-etiqueta">Selección de bodega</p>
-    <h2 class="seccion-titulo">Vinos <em>argentinos</em></h2>
-    <div class="divisor"><span></span><div class="divisor-dot"></div><span></span></div>
-  </div>
-  <div class="vinos-grid" id="grid-vinos">
-    <div class="vino-card">
-      <p class="vino-region">Mendoza — Luján de Cuyo</p>
-      <h3 class="vino-nombre">Achaval Ferrer Malbec</h3>
-      <p class="vino-varietal">Malbec 100% — Cosecha 2021</p>
-      <p class="vino-precio">$9.800 / botella</p>
+<!-- RESERVAS -->
+<section id="reservas" aria-labelledby="hr2">
+  <div class="res-w">
+    <div class="reveal"><div class="eye">Reservas</div><h2 class="stitle" id="hr2">Asegurá tu <em>lugar</em></h2></div>
+    <div class="rinfo reveal d1">
+      <div><div class="ril">Horarios</div><div class="riv">Mar a Dom<br>12:30–15:30<br>20:00–23:30</div></div>
+      <div><div class="ril">Ubicación</div><div class="riv">Av. Belgrano 1240<br>San Salvador de Jujuy</div></div>
+      <div><div class="ril">Contacto</div><div class="riv">+54 388 422 0000<br>WhatsApp disponible</div></div>
     </div>
-    <div class="vino-card">
-      <p class="vino-region">Salta — Cafayate</p>
-      <h3 class="vino-nombre">Clos de los Siete Blanc</h3>
-      <p class="vino-varietal">Torrontés — Cosecha 2022</p>
-      <p class="vino-precio">$7.200 / botella</p>
-    </div>
-    <div class="vino-card">
-      <p class="vino-region">Patagonia — Neuquén</p>
-      <h3 class="vino-nombre">Chacra Pinot Noir</h3>
-      <p class="vino-varietal">Pinot Noir — Cosecha 2020</p>
-      <p class="vino-precio">$14.500 / botella</p>
-    </div>
-    <div class="vino-card">
-      <p class="vino-region">Mendoza — Valle de Uco</p>
-      <h3 class="vino-nombre">Zuccardi Valle Cabernet</h3>
-      <p class="vino-varietal">Cabernet Franc — Cosecha 2021</p>
-      <p class="vino-precio">$11.200 / botella</p>
-    </div>
-    <div class="vino-card">
-      <p class="vino-region">La Rioja</p>
-      <h3 class="vino-nombre">Anko Famatina Malbec</h3>
-      <p class="vino-varietal">Malbec — Cosecha 2022</p>
-      <p class="vino-precio">$5.900 / botella</p>
-    </div>
-    <div class="vino-card">
-      <p class="vino-region">Salta — Altura 2.400m</p>
-      <h3 class="vino-nombre">El Esteco Torrontés</h3>
-      <p class="vino-varietal">Torrontés Riojano — 2023</p>
-      <p class="vino-precio">$4.800 / botella</p>
-    </div>
-    <div id="empty-vinos" class="empty-state" style="display:none;"></div>
+    <form class="rform reveal d2" id="resForm" novalidate aria-label="Formulario de reserva">
+      <div class="fg"><label for="fn">Nombre y apellido *</label><input type="text" id="fn" placeholder="Tu nombre completo" required autocomplete="name"></div>
+      <div class="fg"><label for="ft">Teléfono / WhatsApp</label><input type="tel" id="ft" placeholder="+54 388 000 0000" pattern="[0-9+\s\-]{7,15}" autocomplete="tel"></div>
+      <div class="fg"><label for="ff">Fecha deseada *</label><input type="date" id="ff" required></div>
+      <div class="fg"><label for="ftu">Turno *</label><select id="ftu" required><option value="">Seleccionar turno</option><option value="m">Mediodía (12:30–15:30)</option><option value="n">Noche (20:00–23:30)</option></select></div>
+      <div class="fg"><label for="fp">Cantidad de personas *</label><select id="fp" required><option value="">Seleccionar</option><option>1 persona</option><option>2 personas</option><option>3 personas</option><option>4 personas</option><option>5 personas</option><option>6 personas</option><option value="7+">Más de 6 — consultar</option></select></div>
+      <div class="fg"><label for="fo">Ocasión especial</label><select id="fo"><option value="">Ninguna en particular</option><option>Cumpleaños</option><option>Aniversario</option><option>Reunión de negocios</option><option>Cena romántica</option><option>Otro</option></select></div>
+      <div class="fg full"><label for="fm">Requerimientos especiales</label><textarea id="fm" placeholder="Alergias, preferencias, peticiones especiales…"></textarea></div>
+      <button type="submit" class="bsub">Solicitar reserva</button>
+    </form>
+    <div class="fok" id="formOk" role="status" aria-live="polite"><p>Gracias. Tu solicitud fue recibida — te confirmamos a la brevedad.</p></div>
   </div>
 </section>
 
 <!-- FOOTER -->
-<footer>
-  <p class="footer-logo">La Pampa <em>Alta</em></p>
-  <div class="footer-divider"></div>
-  <p class="footer-info">
-    Av. Belgrano 1240 · San Salvador de Jujuy<br>
-    Reservas: +54 388 422 0000<br>
-    Mar a Dom · 12:30–15:30 · 20:00–23:30
-  </p>
+<footer role="contentinfo">
+  <div class="fg2">
+    <div><a href="#" class="flogo">La Pampa Alta</a><p class="fdesc">Cocina de autor en el corazón del noroeste argentino. Ingredientes de estancia, técnica de altura, alma norteña.</p></div>
+    <nav class="fc" aria-label="Carta"><h4>Carta</h4><ul role="list"><li><a href="#carta" onclick="swl('E')">Entradas</a></li><li><a href="#carta" onclick="swl('P')">Principales</a></li><li><a href="#carta" onclick="swl('D')">Postres</a></li><li><a href="#carta" onclick="swl('V')">Vinos</a></li></ul></nav>
+    <nav class="fc" aria-label="Visitar"><h4>Visitar</h4><ul role="list"><li><a href="#historia">Nuestra historia</a></li><li><a href="#experiencia">La experiencia</a></li><li><a href="#reservas">Reservas</a></li></ul></nav>
+    <div class="fc"><h4>Contacto</h4><address>Av. Belgrano 1240<br>San Salvador de Jujuy<br>Jujuy, Argentina<br><br><a href="tel:+543884220000">+54 388 422 0000</a><br><br>Mar a Dom · 12:30–23:30</address></div>
+  </div>
+  <div class="fbot"><p>© 2026 La Pampa Alta · San Salvador de Jujuy · Argentina</p><p>Cocina de autor · Desde 2018</p></div>
 </footer>
 
+<!-- JS — al final del body, DOM siempre listo -->
 <script>
-  /* ── Navegación entre secciones ── */
-  function mostrar(cat, el) {
-    document.querySelectorAll('.seccion').forEach(s => s.classList.remove('visible'));
-    document.getElementById('sec-' + cat).classList.add('visible');
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('activo'));
-    el.classList.add('activo');
-    window.scrollTo({ top: document.querySelector('.nav-carta').offsetTop - 1, behavior: 'smooth' });
+(function(){
+  'use strict';
+
+  /* ── CURSOR (solo si hay mouse) ── */
+  var isFine = window.matchMedia('(pointer:fine)').matches;
+  if(isFine){
+    var dot  = document.getElementById('curDot');
+    var ring = document.getElementById('curRing');
+    var mx=0,my=0,rx=0,ry=0,raf=null;
+    document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY});
+    function tick(){
+      dot.style.left=mx+'px'; dot.style.top=my+'px';
+      rx+=(mx-rx)*.11; ry+=(my-ry)*.11;
+      ring.style.left=rx+'px'; ring.style.top=ry+'px';
+      raf=requestAnimationFrame(tick);
+    }
+    raf=requestAnimationFrame(tick);
+    document.querySelectorAll('a,button,.mc,.vc,.expc').forEach(function(el){
+      el.addEventListener('mouseenter',function(){ring.classList.add('big')});
+      el.addEventListener('mouseleave',function(){ring.classList.remove('big')});
+    });
+    document.addEventListener('visibilitychange',function(){
+      if(document.hidden){cancelAnimationFrame(raf);raf=null;}
+      else raf=requestAnimationFrame(tick);
+    });
   }
 
-  /* ── Sombra en nav al hacer scroll ── */
-  window.addEventListener('scroll', () => {
-    document.querySelector('.nav-carta').style.boxShadow =
-      window.scrollY > 80 ? '0 4px 30px rgba(13,27,42,0.5)' : 'none';
+  /* ── NAVBAR ── */
+  var nav = document.getElementById('navbar');
+  window.addEventListener('scroll',function(){
+    nav.classList.toggle('scrolled', window.scrollY>60);
+  },{passive:true});
+
+  /* ── TABS ── */
+  var PANELS = {E:'pE',P:'pP',D:'pD',V:'pV'};
+  var TABS   = {E:'tE',P:'tP',D:'tD',V:'tV'};
+  window.sw = function(id,btn){
+    Object.keys(PANELS).forEach(function(k){
+      document.getElementById(PANELS[k]).classList.remove('active');
+      document.getElementById(TABS[k]).setAttribute('aria-selected','false');
+    });
+    document.getElementById(PANELS[id]).classList.add('active');
+    var b = btn || document.getElementById(TABS[id]);
+    if(b) b.setAttribute('aria-selected','true');
+  };
+  window.swl = function(id){ window.sw(id,null); };
+  var tlist = document.querySelector('[role="tablist"]');
+  if(tlist){
+    tlist.addEventListener('keydown',function(e){
+      var order=['E','P','D','V'];
+      var cur=order.find(function(k){return document.getElementById(TABS[k])===document.activeElement});
+      if(!cur) return;
+      var i=order.indexOf(cur);
+      if(e.key==='ArrowRight') document.getElementById(TABS[order[(i+1)%4]]).focus();
+      if(e.key==='ArrowLeft')  document.getElementById(TABS[order[(i-1+4)%4]]).focus();
+    });
+  }
+
+  /* ── REVEAL ── */
+  var ro = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('visible');ro.unobserve(e.target);}
+    });
+  },{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el)});
+
+  /* ── FORM ── */
+  var form   = document.getElementById('resForm');
+  var formOk = document.getElementById('formOk');
+  var ffEl   = document.getElementById('ff');
+  ffEl.setAttribute('min', new Date().toISOString().split('T')[0]);
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(!form.checkValidity()){form.reportValidity();return;}
+    form.style.display='none';
+    formOk.classList.add('show');
+    formOk.scrollIntoView({behavior:'smooth',block:'center'});
   });
+
+  /* ── PARTICLES ── */
+  var pc = document.getElementById('particles');
+  for(var i=0;i<18;i++){
+    var p=document.createElement('div');
+    p.className='particle';
+    var s=Math.random()*2+1;
+    p.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(Math.random()*100)+'%;animation-duration:'+(9+Math.random()*14)+'s;animation-delay:'+(Math.random()*12)+'s;--dx:'+((Math.random()-.5)*180)+'px;';
+    pc.appendChild(p);
+  }
+
+})();
 </script>
 </body>
 </html>
